@@ -1,72 +1,79 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class DragNDrop : MonoBehaviour
 {
-    public Vector3 initialPosition; 
     public Camera cam;
-    private float vectory;
-    //When click is pressed, search if any interactive card
-    //void Update()
-    //{
-    //    if (Input.GetMouseButton(0))
-    //    {
-    //        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-    //        RaycastHit hit;
-    //        if (Physics.Raycast(ray, out hit))
-    //        {
-    //            //If there is do
-    //            //Debug.Log("Algo encontrada!");
-    //            if (hit.collider.CompareTag("Carta"))
-    //            {
-    //                vectory = Input.mousePosition.y - 2.5f;
-    //                //Debug.Log("Carta encontrada!");
-    //                hit.collider.gameObject.transform.position = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, vectory, 5));
+    private bool isDragging = false;
+    private Transform draggedObject;
+    private Vector3 dragOffset;
+    private float objectZDepth;
+    public float yOffset = 1f; // Smaller offset for more accurate following
+    public float placementHeightOffset = 1f; // Offset to place the object above the "Place" item
 
-    //            }
-    //        }
-    //        if (Input.GetMouseButton(0) && Input.GetMouseButtonDown(1))
-    //        {
-
-    //        }
-    //    }
-    //}
     void Update()
     {
-        // called the first time mouse button is pressed
+        // When the left mouse button is clicked, try to grab an object
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            initialPosition = transform.position;
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
-            Vector3 rayPoint = ray.GetPoint(0);
+            // Perform a raycast to detect the object under the mouse
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider.CompareTag("Carta"))
+                {
+                    draggedObject = hit.collider.transform;
+                    isDragging = true;
 
-            // Not sure but this might get you a slightly better value for distance
-            distance = Vector3.Distance(transform.position, rayPoint);
+                    // Capture the Z depth of the object when clicked to maintain its depth
+                    objectZDepth = cam.WorldToScreenPoint(draggedObject.position).z;
+
+                    // Calculate the drag offset (difference between object and mouse position)
+                    Vector3 mousePosition = GetMouseWorldPosition();
+                    dragOffset = draggedObject.position - mousePosition;
+                }
+            }
         }
 
-        // called while button stays pressed
-        if (Input.GetMouseButton(0))
+        // If dragging an object
+        if (isDragging)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Vector3 rayPoint = ray.GetPoint(distance);
-            Ball.MovePosition(initialPosition + new Vector3(rayPoint.x, 0, 0));
+            // Get the mouse position in world space
+            Vector3 mousePosition = GetMouseWorldPosition();
+
+            // Adjust the object's position to follow the mouse accurately, adding a small Y offset
+            draggedObject.position = mousePosition + dragOffset + new Vector3(0, yOffset, 0);
+        }
+
+        // When the left mouse button is released, stop dragging
+        if (Input.GetMouseButtonUp(0) && draggedObject != null)
+        {
+            isDragging = false;
+
+            // Perform a raycast downwards to check for a "Place" item below the dragged object
+            Ray downwardRay = new Ray(draggedObject.position, Vector3.down);
+            RaycastHit hitBelow;
+
+            if (Physics.Raycast(downwardRay, out hitBelow))
+            {
+                if (hitBelow.collider.CompareTag("Place"))
+                {
+                    // Snap the dragged object above the "Place" item
+                    Vector3 placePosition = hitBelow.collider.transform.position;
+                    draggedObject.position = new Vector3(placePosition.x, placePosition.y + placementHeightOffset, placePosition.z);
+                }
+            }
+
+            // Clear the reference to the dragged object
+            draggedObject = null;
         }
     }
 
-
-    //Elevate y+10
-
-    //While click is pressed, maintain elevated + follow the mouse
-
-    //When dropped 
-
-    //if placeholder below --> set on top
-
-    //if not, return to original position
-    //make the function but leave it empty
-
-
+    // Function to get the mouse position in world space with the correct Z depth
+    private Vector3 GetMouseWorldPosition()
+    {
+        Vector3 mouseScreenPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, objectZDepth);
+        return cam.ScreenToWorldPoint(mouseScreenPosition);
+    }
 }
