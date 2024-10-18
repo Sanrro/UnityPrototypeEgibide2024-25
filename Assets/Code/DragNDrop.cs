@@ -88,7 +88,7 @@ public class DragNDrop : MonoBehaviour
         draggedObject = objectToDrag;
         isDragging = true;
         objectZDepth = cam.WorldToScreenPoint(draggedObject.position).z;
-        fixedYPosition = draggedObject.position.y; // Capture the Y position of the object to fix it
+        fixedYPosition = draggedObject.position.y + 1; // Capture the Y position of the object to fix it and add the distance of the action of "picking"
         Vector3 mousePosition = GetMouseWorldPosition();
         dragOffset = draggedObject.position - new Vector3(mousePosition.x, 0, mousePosition.z); // Adjust offset for X and Z only
 
