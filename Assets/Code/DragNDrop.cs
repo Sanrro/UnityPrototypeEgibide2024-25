@@ -7,10 +7,10 @@ public class DragNDrop : MonoBehaviour
     private Transform draggedObject;
     private Vector3 dragOffset;
     private float objectZDepth;
-    private float fixedYPosition; // Store the fixed Y-axis position of the object
-    public float placementHeightOffset = 1f; // Offset to place the object above the "Place" item
-    private Color originalColor; // Store the original color of the object
-    private bool isOverPlace = false; // Track if object is over "Place"
+    private float fixedYPosition;
+    public float placementHeightOffset = 1f;
+    private Color originalColor;
+    private bool isOverPlace = false;
 
     void Update()
     {
@@ -30,7 +30,6 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Function to handle when the mouse button is pressed down
     private void HandleMouseDown()
     {
         RaycastHit hit;
@@ -40,17 +39,14 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Function to handle the dragging behavior
     private void HandleMouseDrag()
     {
         Vector3 mousePosition = GetMouseWorldPosition();
 
-        // Check if the object is over a "Place" item and change color if true
         if (IsMouseOverPlace(out RaycastHit hitBelow))
         {
             if (!isOverPlace)
             {
-                // Change the color to black when first over "Place"
                 ChangeColor(Color.black);
                 isOverPlace = true;
             }
@@ -59,17 +55,14 @@ public class DragNDrop : MonoBehaviour
         {
             if (isOverPlace)
             {
-                // Revert the color when not over "Place" anymore
                 RevertColor();
                 isOverPlace = false;
             }
         }
 
-        // Update the object's position while keeping the Y-axis fixed
         UpdateObjectPosition(mousePosition);
     }
 
-    // Function to handle when the mouse button is released
     private void HandleMouseUp()
     {
         if (draggedObject != null)
@@ -82,17 +75,15 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Start dragging the selected object
     private void StartDragging(Transform objectToDrag)
     {
         draggedObject = objectToDrag;
         isDragging = true;
         objectZDepth = cam.WorldToScreenPoint(draggedObject.position).z;
-        fixedYPosition = draggedObject.position.y + 1; // Capture the Y position of the object to fix it and add the distance of the action of "picking"
+        fixedYPosition = draggedObject.position.y + 1; 
         Vector3 mousePosition = GetMouseWorldPosition();
-        dragOffset = draggedObject.position - new Vector3(mousePosition.x, 0, mousePosition.z); // Adjust offset for X and Z only
+        dragOffset = draggedObject.position - new Vector3(mousePosition.x, 0, mousePosition.z);
 
-        // Get the original color of the object (assuming the object has a Renderer component)
         Renderer renderer = draggedObject.GetComponent<Renderer>();
         if (renderer != null)
         {
@@ -100,7 +91,6 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Stop dragging and reset the state
     private void StopDragging()
     {
         isDragging = false;
@@ -112,10 +102,8 @@ public class DragNDrop : MonoBehaviour
         draggedObject = null;
     }
 
-    // Function to update the object's position while dragging
     private void UpdateObjectPosition(Vector3 mousePosition)
     {
-        // Only update the X and Z positions, keep the Y-axis fixed
         draggedObject.position = new Vector3(
             mousePosition.x + dragOffset.x,
             fixedYPosition,  // Keep Y-axis fixed
@@ -123,28 +111,24 @@ public class DragNDrop : MonoBehaviour
         );
     }
 
-    // Function to convert mouse screen position to world position
     private Vector3 GetMouseWorldPosition()
     {
         Vector3 mouseScreenPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, objectZDepth);
         return cam.ScreenToWorldPoint(mouseScreenPosition);
     }
 
-    // Function to perform a raycast from the mouse position
     private bool RaycastFromMouse(out RaycastHit hit)
     {
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         return Physics.Raycast(ray, out hit);
     }
 
-    // Function to check if the object is over a "Place" object
     private bool IsMouseOverPlace(out RaycastHit hitBelow)
     {
         Ray downwardRay = new Ray(draggedObject.position, Vector3.down);
         return Physics.Raycast(downwardRay, out hitBelow) && hitBelow.collider.CompareTag("Place");
     }
 
-    // Function to change the color of the dragged object
     private void ChangeColor(Color color)
     {
         Renderer renderer = draggedObject.GetComponent<Renderer>();
@@ -155,7 +139,6 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Function to revert the color of the dragged object to its original color
     private void RevertColor()
     {
         Renderer renderer = draggedObject.GetComponent<Renderer>();
@@ -165,7 +148,6 @@ public class DragNDrop : MonoBehaviour
         }
     }
 
-    // Function to snap the dragged object above the "Place" item
     private void SnapToPlace(RaycastHit hitBelow)
     {
         Vector3 placePosition = hitBelow.collider.transform.position;
