@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 963194227}
   yOffset: 1
-  placementHeightOffset: 1
+  placementHeightOffset: 0
 --- !u!4 &99736616
 Transform:
   m_ObjectHideFlags: 0
@@ -632,7 +632,7 @@ Transform:
   m_GameObject: {fileID: 1213607346}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.87, y: -11.7, z: -11.5}
+  m_LocalPosition: {x: -2.87, y: -11.7, z: -2.3}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
