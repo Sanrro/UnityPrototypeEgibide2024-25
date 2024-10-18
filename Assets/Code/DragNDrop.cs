@@ -151,6 +151,7 @@ public class DragNDrop : MonoBehaviour
         if (renderer != null)
         {
             renderer.material.color = color;
+
         }
     }
 
